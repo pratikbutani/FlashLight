@@ -1,7 +1,7 @@
-# FlashIt
+# Flash Light
 Android App 
 
-Name of the app is Pub Flashlight
+Name of the app is Flashlight
 
 About the app :
 It is Utility and Entertainment app for controlling mobile flashlight.
@@ -15,6 +15,3 @@ user permission.
 - It has a button for switching the flash light on/off .
 - With the help of seekbar when the flashlight is on user can produce twikling effect whose frequency depends of seekbar value.
 - This app runs in background also.
-
-
-
