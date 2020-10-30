@@ -11,88 +11,81 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.CompoundButton;
 import android.widget.SeekBar;
-import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import androidx.databinding.DataBindingUtil;
+
+import com.example.saturn.flashit.databinding.ActivityMainBinding;
 
 
 public class MainActivity extends Activity {
 
-    //private ImageButton button;
-    @BindView(R.id.textView_progress)
-    TextView textView;
-    @BindView(R.id.imageToggleButton)
-    ToggleButton button;
-    @BindView(R.id.seekBar)
-    SeekBar seekBar;
+	private static final String Value_ZERO = "0";
+	private final Time timeVar = new Time();
+	public Context mContext;
 
-    private static final String Value_ZERO = "0";
-    private boolean isFlashOn = false;
-    private int freq;
-    private Thread t;
-    private StroboRunner stroboRunner;
-    private boolean stopFlicker = false;
-    public Context mContext;
+	ActivityMainBinding binding;
 
-    private CameraManager mCameraManager;
-    private String cameraId;
-    private final Time timeVar = new Time();
+	private boolean isFlashOn = false;
+	private int freq;
+	private Thread t;
+	private StroboRunner stroboRunner;
+	private boolean stopFlicker = false;
+	private CameraManager mCameraManager;
+	private String cameraId;
 
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        mContext = this;
-        ButterKnife.bind(this);
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
-        checkForResources();
-        seekBarMethod();
-    }
+		mContext = this;
+
+		checkForResources();
+		seekBarMethod();
+	}
 
 
-    private void checkForResources() {
-        PackageManager pm = mContext.getPackageManager();
+	private void checkForResources() {
+		PackageManager pm = mContext.getPackageManager();
 
-        /*Checking availability of required camera hardware*/
-        if (!pm.hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
-            Toast.makeText(getApplicationContext(),
-                    getString(R.string.NO_CAMERA_ERROR),
-                    Toast.LENGTH_SHORT).show();
-        } else {
+		/*Checking availability of required camera hardware*/
+		if (!pm.hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
+			Toast.makeText(getApplicationContext(),
+					getString(R.string.NO_CAMERA_ERROR),
+					Toast.LENGTH_SHORT).show();
+		} else {
 //            initialiseResources();
-            initialiseResourcesCamera2();
-            setToggleButtonBehaviour();
+			initialiseResourcesCamera2();
+			setToggleButtonBehaviour();
 
-        }
+		}
 
-    }
+	}
 
-    @TargetApi(Build.VERSION_CODES.M)
-    private void initialiseResourcesCamera2() {
+	@TargetApi(Build.VERSION_CODES.M)
+	private void initialiseResourcesCamera2() {
 
-        mCameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
+		mCameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
 //        mCameraManager.registerTorchCallback(torchCallback, null);// (callback, handler)
-        try {
-            cameraId =  mCameraManager.getCameraIdList()[0];
-        } catch (CameraAccessException e) {
-            e.printStackTrace();
-        }
+		try {
+			cameraId = mCameraManager.getCameraIdList()[0];
+		} catch (CameraAccessException e) {
+			e.printStackTrace();
+		}
 
 //        checkForCameraPermission();
-    }
+	}
 
 
-    private void setFlashOn(Boolean enable) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            try {
-                mCameraManager.setTorchMode(cameraId,enable);
-            } catch (CameraAccessException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+	private void setFlashOn(Boolean enable) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+			try {
+				mCameraManager.setTorchMode(cameraId, enable);
+			} catch (CameraAccessException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 
     /*CameraManager.TorchCallback torchCallback = new CameraManager.TorchCallback() {
         @Override
@@ -104,126 +97,122 @@ public class MainActivity extends Activity {
         public void onTorchModeChanged(String cameraId, boolean enabled) {
             super.onTorchModeChanged(cameraId, enabled);
             *//*isFlashOn = enabled;
-            button.setChecked(enabled);*//*
+            binding.imageToggleButton.setChecked(enabled);*//*
         }
     };*/
 
-    private void setToggleButtonBehaviour() {
+	private void setToggleButtonBehaviour() {
 
-        //Using toggle button with background image
-        button.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                isFlashOn = isChecked;
-                if (!isChecked) {
-                    // The toggle is enabled
-                    Log.i("info", "torch is turned off!");
-                    setFlashOn(false);
-                    isFlashOn = false;
-                    seekBar.setProgress(0);
-                    textView.setText(Value_ZERO);
-                    if (t!= null) {
-                        stopFlicker = true;
-                        t = null;
-                    }
-                } else {
-                    // The toggle is disabled
-                    Log.i("info", "torch is turned on!");
-                    setFlashOn(true);
-                    isFlashOn = true;
-                    stopFlicker = false;
+		//Using toggle button with background image
+		binding.imageToggleButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            isFlashOn = isChecked;
+            if (!isChecked) {
+                // The toggle is enabled
+                Log.i("info", "torch is turned off!");
+                setFlashOn(false);
+                isFlashOn = false;
+                binding.seekBar.setProgress(0);
+                binding.textViewProgress.setText(Value_ZERO);
+
+                if (t != null) {
+                    stopFlicker = true;
+                    t = null;
                 }
+            } else {
+                // The toggle is disabled
+                Log.i("info", "torch is turned on!");
+                setFlashOn(true);
+                isFlashOn = true;
+                stopFlicker = false;
             }
         });
-    }
+	}
 
-    private void seekBarMethod() {
-         /*SeekBar which will indicate value of brightness of torch*/
-        seekBar.setMax(10);
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            int progressValue;
+	private void seekBarMethod() {
+		/*SeekBar which will indicate value of brightness of torch*/
+		binding.seekBar.setMax(10);
+		binding.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+			int progressValue;
 
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                progressValue = progress;
-                textView.setText(progressValue + "");
+			@Override
+			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+				progressValue = progress;
+				binding.textViewProgress.setText(progressValue + "");
 
-            }
+			}
 
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
+			@Override
+			public void onStartTrackingTouch(SeekBar seekBar) {
+			}
 
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                textView.setText(progressValue + "");
-                flashFlicker();
-            }
-        });
-    }
+			@Override
+			public void onStopTrackingTouch(SeekBar seekBar) {
+				binding.textViewProgress.setText(progressValue + "");
+				flashFlicker();
+			}
+		});
+	}
 
-    private void flashFlicker() {
-        if (isFlashOn) {
-            freq = seekBar.getProgress();
-            timeVar.setSleepTime(freq);
-            stroboRunner = new StroboRunner();
-            t = new Thread(stroboRunner);
-            t.start();
-            return;
+	private void flashFlicker() {
+		if (isFlashOn) {
+			freq = binding.seekBar.getProgress();
+			timeVar.setSleepTime(freq);
+			stroboRunner = new StroboRunner();
+			t = new Thread(stroboRunner);
+			t.start();
         } else {
-            Toast.makeText(MainActivity.this, getString(R.string.SWICH_FLASH_ON), Toast.LENGTH_SHORT).show();
-            seekBar.setProgress(0);
-            textView.setText(Value_ZERO);
-        }
-    }
+			Toast.makeText(MainActivity.this, getString(R.string.SWICH_FLASH_ON), Toast.LENGTH_SHORT).show();
+			binding.seekBar.setProgress(0);
+			binding.textViewProgress.setText(Value_ZERO);
+		}
+	}
 
-    private class StroboRunner implements Runnable {
+	/*Releasing camera resources*/
+	private void releaseCamera() {
+		setFlashOn(false);
+		binding.seekBar.setProgress(0);
+		isFlashOn = false;
+		binding.textViewProgress.setText(Value_ZERO);
+		binding.imageToggleButton.setChecked(false);
+	}
 
-        public void run() {
-            try {
-                while (!stopFlicker) {
+	@Override
+	protected void onStop() {
+		super.onStop();
+	}
 
-                    if (freq != 0) {
-                        setFlashOn(true);
-                        Thread.sleep(timeVar.getSleepTime());
-                        setFlashOn(false);
-                        Thread.sleep(timeVar.getSleepTime());
-                    } else {
-                        setFlashOn(true);
-                    }
-                }
+	@Override
+	protected void onPause() {
+		super.onPause();
+	}
 
-            } catch (Exception e) {
-                e.getStackTrace();
-            }
-        }
-    }
-
-    /*Releasing camera resources*/
-    private void releaseCamera(){
-        setFlashOn(false);
-        seekBar.setProgress(0);
-        isFlashOn=false;
-        textView.setText(Value_ZERO);
-        button.setChecked(false);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        releaseCamera();
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		releaseCamera();
 //        mCameraManager.unregisterTorchCallback(torchCallback);
 
-    }
+	}
 
+	private class StroboRunner implements Runnable {
 
+		public void run() {
+			try {
+				while (!stopFlicker) {
+
+					if (freq != 0) {
+						setFlashOn(true);
+						Thread.sleep(timeVar.getSleepTime());
+						setFlashOn(false);
+						Thread.sleep(timeVar.getSleepTime());
+					} else {
+						setFlashOn(true);
+					}
+				}
+
+			} catch (Exception e) {
+				e.getStackTrace();
+			}
+		}
+	}
 }
