@@ -3,5 +3,8 @@
 
     <string name="NO_CAMERA_ERROR">No Camera !</string>
     <string name="SWICH_FLASH_ON">Switch the flash ON !</string>
-    
+
+    <string name="ads_app_id">ca-app-pub-3940256099942544~3347511713</string>
+    <string name="ads_banner_id">ca-app-pub-3940256099942544~3347511713</string>
+    <string name="ads_interstitial_id">ca-app-pub-3940256099942544~3347511713</string>
 </resources>

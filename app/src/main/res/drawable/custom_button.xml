@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true"
-        android:drawable="@drawable/button_pressed" /> <!-- pressed -->
+        android:drawable="@drawable/ic_on" /> <!-- pressed -->
     <item android:state_focused="true"
-        android:drawable="@drawable/button_focused" /> <!-- focused -->
-    <item android:drawable="@drawable/button_normal" /> <!-- default -->
+        android:drawable="@drawable/ic_off" /> <!-- focused -->
+    <item android:drawable="@drawable/ic_on" /> <!-- default -->
 
 </selector>
